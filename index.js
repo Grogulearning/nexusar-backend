@@ -12,8 +12,13 @@ const API_KEY = '474818474224319';
 const API_SECRET = 'y-RkFtDP_5XjiC-x5RO5rf5Ciw0';
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+app.options('*', cors()); // Preflight requests
 
 // Base de datos en memoria (se reinicia cuando el servidor se reinicia)
 let experiences = [];
