@@ -15,13 +15,15 @@ const API_SECRET = 'y-RkFtDP_5XjiC-x5RO5rf5Ciw0';
 app.use(cors());
 app.use(express.json());
 
-// Base de datos en memoria
+// Base de datos en memoria (se reinicia cuando el servidor se reinicia)
 let experiences = [];
 
-// GUARDAR EXPERIENCIA
+// ══════════════════════════════════════════
+//  GUARDAR EXPERIENCIA
+// ══════════════════════════════════════════
 app.post('/api/save-experience', (req, res) => {
   try {
-    const { name, imgURL, vidURL, viewerURL } = req.body;
+    const { name, imgURL, vidURL, viewerURL, shape } = req.body;
 
     if (!name || !imgURL || !vidURL) {
       return res.status(400).json({ error: 'Faltan datos requeridos' });
@@ -33,12 +35,14 @@ app.post('/api/save-experience', (req, res) => {
       imgURL,
       vidURL,
       viewerURL: viewerURL || '',
+      shape: shape || 'circle',
       created: new Date().toISOString(),
       public: true
     };
 
     experiences.unshift(experience);
     
+    // Mantener máximo 100 experiencias
     if (experiences.length > 100) {
       experiences = experiences.slice(0, 100);
     }
@@ -54,7 +58,9 @@ app.post('/api/save-experience', (req, res) => {
   }
 });
 
-// OBTENER EXPERIENCIAS
+// ══════════════════════════════════════════
+//  OBTENER EXPERIENCIAS
+// ══════════════════════════════════════════
 app.get('/api/get-experiences', (req, res) => {
   try {
     const publicExperiences = experiences.filter(exp => exp.public !== false);
@@ -65,7 +71,9 @@ app.get('/api/get-experiences', (req, res) => {
   }
 });
 
-// ELIMINAR EXPERIENCIA
+// ══════════════════════════════════════════
+//  ELIMINAR EXPERIENCIA
+// ══════════════════════════════════════════
 app.post('/api/delete-experience', async (req, res) => {
   try {
     const { id, imgURL, vidURL } = req.body;
@@ -79,6 +87,7 @@ app.post('/api/delete-experience', async (req, res) => {
       return res.status(404).json({ error: 'Experiencia no encontrada' });
     }
 
+    // Eliminar de Cloudinary
     const results = { image: null, video: null };
 
     if (imgURL) {
@@ -95,6 +104,7 @@ app.post('/api/delete-experience', async (req, res) => {
       }
     }
 
+    // Eliminar del array
     experiences.splice(index, 1);
 
     res.json({ 
@@ -108,7 +118,9 @@ app.post('/api/delete-experience', async (req, res) => {
   }
 });
 
-// HELPERS
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
 function extractPublicID(url) {
   const match = url.match(/\/v\d+\/(.+)\.\w+$/);
   return match ? match[1] : null;
@@ -137,11 +149,14 @@ async function deleteFromCloudinary(publicId, resourceType = 'image') {
   return response.json();
 }
 
-// HEALTH CHECK
+// ══════════════════════════════════════════
+//  HEALTH CHECK
+// ══════════════════════════════════════════
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', experiences: experiences.length });
 });
 
+// Iniciar servidor
 app.listen(PORT, () => {
   console.log(`🚀 NexusAR Backend running on port ${PORT}`);
 });
