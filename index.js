@@ -34,9 +34,9 @@ async function saveExperiences(experiences) {
 
 app.post('/api/save-experience', async (req, res) => {
   try {
-    const { name, imgURL, vidURL, viewerURL, mindURL } = req.body;
+    const { name, imgURL, vidURL, viewerURL, mindURL, shape } = req.body;
     if (!name || !imgURL || !vidURL) return res.status(400).json({ error: 'Faltan datos' });
-    const experience = { id: Date.now().toString(), name, imgURL, vidURL, viewerURL: viewerURL || '', mindURL: mindURL || null, created: new Date().toISOString(), public: true };
+    const experience = { id: Date.now().toString(), name, imgURL, vidURL, viewerURL: viewerURL || '', mindURL: mindURL || null, shape: shape || 'none', created: new Date().toISOString(), public: true };
     const experiences = await getExperiences();
     experiences.unshift(experience);
     await saveExperiences(experiences.slice(0, 100));
