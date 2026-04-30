@@ -51,6 +51,20 @@ app.get('/api/get-experiences', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.post('/api/update-experience', async (req, res) => {
+  try {
+    const { id, imgURL, vidURL } = req.body;
+    if (!id) return res.status(400).json({ error: 'ID requerido' });
+    const experiences = await getExperiences();
+    const index = experiences.findIndex(e => e.id === id);
+    if (index === -1) return res.status(404).json({ error: 'No encontrada' });
+    if (imgURL) experiences[index].imgURL = imgURL;
+    if (vidURL) experiences[index].vidURL = vidURL;
+    await saveExperiences(experiences);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.post('/api/delete-experience', async (req, res) => {
   try {
     const { id, imgURL, vidURL } = req.body;
